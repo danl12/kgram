@@ -11,7 +11,7 @@ repositories {
 
 dependencies {
     implementation(project(":library"))
-    implementation("org.telegram:telegrambots-meta:8.2.0")
+    implementation("org.telegram:telegrambots-meta:8.3.0")
     testImplementation(kotlin("test"))
 }
 
