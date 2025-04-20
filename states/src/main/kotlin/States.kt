@@ -1,9 +1,9 @@
-package ru.danl.kgram.state
+package ru.danl.kgram.states
 
 import ru.danl.kgram.KGram
 import ru.danl.kgram.kGram
-import ru.danl.kgram.state.store.HashMapStateStore
-import ru.danl.kgram.state.store.StateStore
+import ru.danl.kgram.states.store.HashMapStateStore
+import ru.danl.kgram.states.store.StateStore
 import kotlin.reflect.KClass
 
 /**

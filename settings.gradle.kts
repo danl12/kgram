@@ -3,4 +3,5 @@ plugins {
 }
 rootProject.name = "kgram"
 include("example")
-include("library")
+include("core")
+include("states")

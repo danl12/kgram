@@ -1,6 +1,6 @@
-package ru.danl.kgram.state.store
+package ru.danl.kgram.states.store
 
-import ru.danl.kgram.state.StatesHolder
+import ru.danl.kgram.states.StatesHolder
 
 /**
  * A generic interface for storing and retrieving user-specific state in a Telegram bot.

@@ -2,15 +2,13 @@ plugins {
     kotlin("jvm")
 }
 
-group = "ru.danl"
-version = "1.0-SNAPSHOT"
-
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation(project(":library"))
+    implementation(project(":core"))
+    implementation(project(":states"))
     implementation("org.telegram:telegrambots-meta:8.3.0")
     testImplementation(kotlin("test"))
 }

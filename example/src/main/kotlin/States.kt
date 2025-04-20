@@ -5,6 +5,7 @@ import ru.danl.kgram.kGram
 import ru.danl.kgram.state.StateContext
 import ru.danl.kgram.state.StateHandler
 import ru.danl.kgram.state.states
+import ru.danl.state.states
 
 data class ExampleGlobalState(
     val userId: Long

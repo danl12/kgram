@@ -1,4 +1,4 @@
-package ru.danl.kgram.state
+package ru.danl.kgram.states
 
 /**
  * A container that holds both the user-specific state and a user-specific global state.

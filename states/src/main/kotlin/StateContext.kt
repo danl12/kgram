@@ -1,4 +1,4 @@
-package ru.danl.kgram.state
+package ru.danl.kgram.states
 
 import ru.danl.kgram.KGram
 
