@@ -14,13 +14,6 @@ dependencies {
     implementation(project(":core"))
 }
 
-tasks.test {
-    useJUnitPlatform()
-}
-kotlin {
-    jvmToolchain(21)
-}
-
 publishing {
     publications {
         create<MavenPublication>("maven") {
