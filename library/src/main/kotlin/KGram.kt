@@ -32,21 +32,23 @@ import org.telegram.telegrambots.meta.api.objects.polls.Poll
 import org.telegram.telegrambots.meta.api.objects.polls.PollAnswer
 import org.telegram.telegrambots.meta.api.objects.reactions.MessageReactionCountUpdated
 import org.telegram.telegrambots.meta.api.objects.reactions.MessageReactionUpdated
-import ru.danl.kgram.KGram.Config
 import ru.danl.kgram.handler.UpdateHandler
 import ru.danl.kgram.handler.UpdatePropertyHandler
 import java.io.Serializable
 import kotlin.reflect.KFunction2
 
-suspend fun startKGram(token: String, configure: Config.() -> Unit) =
-    KGram(config = Config(token).apply(configure)).apply { start() }
+fun kGram(token: String, configure: KGram.() -> Unit) =
+    KGram(token = token).apply(configure)
 
 class KGram internal constructor(
-    private val config: Config
+    private val token: String
 ) {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default.limitedParallelism(1))
-    private val telegramClient = OkHttpTelegramClient(config.token)
+    private val telegramClient = OkHttpTelegramClient(token)
+
+    private val updateHandlers = mutableListOf<UpdateHandler>()
+    private val allowedUpdates = mutableSetOf<String>()
 
     private fun KFunction2<Update, *, Unit>.getJsonPropertyValue() =
         (annotations.single { it.annotationClass == JsonProperty::class } as JsonProperty).value
@@ -54,10 +56,9 @@ class KGram internal constructor(
     private val telegramBotsLongPollingApplication = TelegramBotsLongPollingApplication()
 
     suspend fun start() = suspendCancellableCoroutine<Unit> { continuation ->
-        val allowedUpdates = config.allowedUpdates.map { it.getJsonPropertyValue() }
         val botSession = telegramBotsLongPollingApplication
             .registerBot(
-                config.token,
+                token,
                 { TelegramUrl.DEFAULT_URL },
                 { lastReceivedUpdate ->
                     GetUpdates
@@ -73,8 +74,8 @@ class KGram internal constructor(
                     coroutineScope.launch(
                         KGramUpdateContext(this)
                     ) {
-                        config.updateHandlers.forEach {
-                            it.handleUpdate(this@KGram, update)
+                        updateHandlers.forEach {
+                            it.handleUpdate(update)
                         }
                     }
                 }
@@ -154,200 +155,246 @@ class KGram internal constructor(
     suspend fun downloadFileAsStream(filePath: String) =
         telegramClient.downloadFileAsStreamAsync(filePath).await()
 
-    class Config internal constructor(
-        val token: String,
+    fun handleMessage(
+        filter: suspend (Message) -> Boolean = { true },
+        handler: suspend KGram.(Message) -> Unit
     ) {
+        updateHandlers.add(UpdatePropertyHandler(Update::getMessage, filter = filter, handleProperty = handler))
+        allowedUpdates.add(Update::setMessage.getJsonPropertyValue())
+    }
 
-        internal val updateHandlers = mutableListOf<UpdateHandler>()
-        internal val allowedUpdates = mutableListOf<KFunction2<Update, *, Unit>>()
+    fun handleInlineQuery(
+        filter: suspend (InlineQuery) -> Boolean = { true },
+        handler: suspend KGram.(InlineQuery) -> Unit
+    ) {
+        updateHandlers.add(UpdatePropertyHandler(Update::getInlineQuery, filter = filter, handleProperty = handler))
+        allowedUpdates.add(Update::setInlineQuery.getJsonPropertyValue())
+    }
 
-        fun handleMessage(
-            filter: suspend (Message) -> Boolean = { true },
-            handler: suspend KGram.(Message) -> Unit
-        ) {
-            updateHandlers.add(UpdatePropertyHandler(Update::getMessage, filter = filter, handleProperty = handler))
-            allowedUpdates.add(Update::setMessage)
-        }
+    fun handleChosenInlineQuery(
+        filter: suspend (ChosenInlineQuery) -> Boolean = { true },
+        handler: suspend KGram.(ChosenInlineQuery) -> Unit
+    ) {
+        updateHandlers.add(
+            UpdatePropertyHandler(
+                Update::getChosenInlineQuery,
+                filter = filter,
+                handleProperty = handler
+            )
+        )
+        allowedUpdates.add(Update::setChosenInlineQuery.getJsonPropertyValue())
+    }
 
-        fun handleInlineQuery(
-            filter: suspend (InlineQuery) -> Boolean = { true },
-            handler: suspend KGram.(InlineQuery) -> Unit
-        ) {
-            updateHandlers.add(UpdatePropertyHandler(Update::getInlineQuery, filter = filter, handleProperty = handler))
-            allowedUpdates.add(Update::setInlineQuery)
-        }
+    fun handleCallbackQuery(
+        filter: suspend (CallbackQuery) -> Boolean = { true },
+        handler: suspend KGram.(CallbackQuery) -> Unit
+    ) {
+        updateHandlers.add(UpdatePropertyHandler(Update::getCallbackQuery, filter = filter, handleProperty = handler))
+        allowedUpdates.add(Update::setCallbackQuery.getJsonPropertyValue())
+    }
 
-        fun handleChosenInlineQuery(
-            filter: suspend (ChosenInlineQuery) -> Boolean = { true },
-            handler: suspend KGram.(ChosenInlineQuery) -> Unit
-        ) {
-            updateHandlers.add(UpdatePropertyHandler(Update::getChosenInlineQuery, filter = filter, handleProperty = handler))
-            allowedUpdates.add(Update::setChosenInlineQuery)
-        }
+    fun handleEditedMessage(
+        filter: suspend (Message) -> Boolean = { true },
+        handler: suspend KGram.(Message) -> Unit
+    ) {
+        updateHandlers.add(UpdatePropertyHandler(Update::getEditedMessage, filter = filter, handleProperty = handler))
+        allowedUpdates.add(Update::setEditedMessage.getJsonPropertyValue())
+    }
 
-        fun handleCallbackQuery(
-            filter: suspend (CallbackQuery) -> Boolean = { true },
-            handler: suspend KGram.(CallbackQuery) -> Unit
-        ) {
-            updateHandlers.add(UpdatePropertyHandler(Update::getCallbackQuery, filter = filter, handleProperty = handler))
-            allowedUpdates.add(Update::setCallbackQuery)
-        }
+    fun handleChannelPost(
+        filter: suspend (Message) -> Boolean = { true },
+        handler: suspend KGram.(Message) -> Unit
+    ) {
+        updateHandlers.add(UpdatePropertyHandler(Update::getChannelPost, filter = filter, handleProperty = handler))
+        allowedUpdates.add(Update::setChannelPost.getJsonPropertyValue())
+    }
 
-        fun handleEditedMessage(
-            filter: suspend (Message) -> Boolean = { true },
-            handler: suspend KGram.(Message) -> Unit
-        ) {
-            updateHandlers.add(UpdatePropertyHandler(Update::getEditedMessage, filter = filter, handleProperty = handler))
-            allowedUpdates.add(Update::setEditedMessage)
-        }
+    fun handleEditedChannelPost(
+        filter: suspend (Message) -> Boolean = { true },
+        handler: suspend KGram.(Message) -> Unit
+    ) {
+        updateHandlers.add(
+            UpdatePropertyHandler(
+                Update::getEditedChannelPost,
+                filter = filter,
+                handleProperty = handler
+            )
+        )
+        allowedUpdates.add(Update::setEditedChannelPost.getJsonPropertyValue())
+    }
 
-        fun handleChannelPost(
-            filter: suspend (Message) -> Boolean = { true },
-            handler: suspend KGram.(Message) -> Unit
-        ) {
-            updateHandlers.add(UpdatePropertyHandler(Update::getChannelPost, filter = filter, handleProperty = handler))
-            allowedUpdates.add(Update::setChannelPost)
-        }
+    fun handleShippingQuery(
+        filter: suspend (ShippingQuery) -> Boolean = { true },
+        handler: suspend KGram.(ShippingQuery) -> Unit
+    ) {
+        updateHandlers.add(UpdatePropertyHandler(Update::getShippingQuery, filter = filter, handleProperty = handler))
+        allowedUpdates.add(Update::setShippingQuery.getJsonPropertyValue())
+    }
 
-        fun handleEditedChannelPost(
-            filter: suspend (Message) -> Boolean = { true },
-            handler: suspend KGram.(Message) -> Unit
-        ) {
-            updateHandlers.add(UpdatePropertyHandler(Update::getEditedChannelPost, filter = filter, handleProperty = handler))
-            allowedUpdates.add(Update::setEditedChannelPost)
-        }
+    fun handlePreCheckoutQuery(
+        filter: suspend (PreCheckoutQuery) -> Boolean = { true },
+        handler: suspend KGram.(PreCheckoutQuery) -> Unit
+    ) {
+        updateHandlers.add(
+            UpdatePropertyHandler(
+                Update::getPreCheckoutQuery,
+                filter = filter,
+                handleProperty = handler
+            )
+        )
+        allowedUpdates.add(Update::setPreCheckoutQuery.getJsonPropertyValue())
+    }
 
-        fun handleShippingQuery(
-            filter: suspend (ShippingQuery) -> Boolean = { true },
-            handler: suspend KGram.(ShippingQuery) -> Unit
-        ) {
-            updateHandlers.add(UpdatePropertyHandler(Update::getShippingQuery, filter = filter, handleProperty = handler))
-            allowedUpdates.add(Update::setShippingQuery)
-        }
+    fun handlePoll(
+        filter: suspend (Poll) -> Boolean = { true },
+        handler: suspend KGram.(Poll) -> Unit
+    ) {
+        updateHandlers.add(UpdatePropertyHandler(Update::getPoll, filter = filter, handleProperty = handler))
+        allowedUpdates.add(Update::setPoll.getJsonPropertyValue())
+    }
 
-        fun handlePreCheckoutQuery(
-            filter: suspend (PreCheckoutQuery) -> Boolean = { true },
-            handler: suspend KGram.(PreCheckoutQuery) -> Unit
-        ) {
-            updateHandlers.add(UpdatePropertyHandler(Update::getPreCheckoutQuery, filter = filter, handleProperty = handler))
-            allowedUpdates.add(Update::setPreCheckoutQuery)
-        }
+    fun handlePollAnswer(
+        filter: suspend (PollAnswer) -> Boolean = { true },
+        handler: suspend KGram.(PollAnswer) -> Unit
+    ) {
+        updateHandlers.add(UpdatePropertyHandler(Update::getPollAnswer, filter = filter, handleProperty = handler))
+        allowedUpdates.add(Update::setPollAnswer.getJsonPropertyValue())
+    }
 
-        fun handlePoll(
-            filter: suspend (Poll) -> Boolean = { true },
-            handler: suspend KGram.(Poll) -> Unit
-        ) {
-            updateHandlers.add(UpdatePropertyHandler(Update::getPoll, filter = filter, handleProperty = handler))
-            allowedUpdates.add(Update::setPoll)
-        }
+    fun handleMyChatMember(
+        filter: suspend (ChatMemberUpdated) -> Boolean = { true },
+        handler: suspend KGram.(ChatMemberUpdated) -> Unit
+    ) {
+        updateHandlers.add(UpdatePropertyHandler(Update::getMyChatMember, filter = filter, handleProperty = handler))
+        allowedUpdates.add(Update::setMyChatMember.getJsonPropertyValue())
+    }
 
-        fun handlePollAnswer(
-            filter: suspend (PollAnswer) -> Boolean = { true },
-            handler: suspend KGram.(PollAnswer) -> Unit
-        ) {
-            updateHandlers.add(UpdatePropertyHandler(Update::getPollAnswer, filter = filter, handleProperty = handler))
-            allowedUpdates.add(Update::setPollAnswer)
-        }
+    fun handleChatMember(
+        filter: suspend (ChatMemberUpdated) -> Boolean = { true },
+        handler: suspend KGram.(ChatMemberUpdated) -> Unit
+    ) {
+        updateHandlers.add(UpdatePropertyHandler(Update::getChatMember, filter = filter, handleProperty = handler))
+        allowedUpdates.add(Update::setChatMember.getJsonPropertyValue())
+    }
 
-        fun handleMyChatMember(
-            filter: suspend (ChatMemberUpdated) -> Boolean = { true },
-            handler: suspend KGram.(ChatMemberUpdated) -> Unit
-        ) {
-            updateHandlers.add(UpdatePropertyHandler(Update::getMyChatMember, filter = filter, handleProperty = handler))
-            allowedUpdates.add(Update::setMyChatMember)
-        }
+    fun handleChatJoinRequest(
+        filter: suspend (ChatJoinRequest) -> Boolean = { true },
+        handler: suspend KGram.(ChatJoinRequest) -> Unit
+    ) {
+        updateHandlers.add(UpdatePropertyHandler(Update::getChatJoinRequest, filter = filter, handleProperty = handler))
+        allowedUpdates.add(Update::setChatJoinRequest.getJsonPropertyValue())
+    }
 
-        fun handleChatMember(
-            filter: suspend (ChatMemberUpdated) -> Boolean = { true },
-            handler: suspend KGram.(ChatMemberUpdated) -> Unit
-        ) {
-            updateHandlers.add(UpdatePropertyHandler(Update::getChatMember, filter = filter, handleProperty = handler))
-            allowedUpdates.add(Update::setChatMember)
-        }
+    fun handleMessageReaction(
+        filter: suspend (MessageReactionUpdated) -> Boolean = { true },
+        handler: suspend KGram.(MessageReactionUpdated) -> Unit
+    ) {
+        updateHandlers.add(UpdatePropertyHandler(Update::getMessageReaction, filter = filter, handleProperty = handler))
+        allowedUpdates.add(Update::setMessageReaction.getJsonPropertyValue())
+    }
 
-        fun handleChatJoinRequest(
-            filter: suspend (ChatJoinRequest) -> Boolean = { true },
-            handler: suspend KGram.(ChatJoinRequest) -> Unit
-        ) {
-            updateHandlers.add(UpdatePropertyHandler(Update::getChatJoinRequest, filter = filter, handleProperty = handler))
-            allowedUpdates.add(Update::setChatJoinRequest)
-        }
+    fun handleMessageReactionCount(
+        filter: suspend (MessageReactionCountUpdated) -> Boolean = { true },
+        handler: suspend KGram.(MessageReactionCountUpdated) -> Unit
+    ) {
+        updateHandlers.add(
+            UpdatePropertyHandler(
+                Update::getMessageReactionCount,
+                filter = filter,
+                handleProperty = handler
+            )
+        )
+        allowedUpdates.add(Update::setMessageReactionCount.getJsonPropertyValue())
+    }
 
-        fun handleMessageReaction(
-            filter: suspend (MessageReactionUpdated) -> Boolean = { true },
-            handler: suspend KGram.(MessageReactionUpdated) -> Unit
-        ) {
-            updateHandlers.add(UpdatePropertyHandler(Update::getMessageReaction, filter = filter, handleProperty = handler))
-            allowedUpdates.add(Update::setMessageReaction)
-        }
+    fun handleChatBoost(
+        filter: suspend (ChatBoostUpdated) -> Boolean = { true },
+        handler: suspend KGram.(ChatBoostUpdated) -> Unit
+    ) {
+        updateHandlers.add(UpdatePropertyHandler(Update::getChatBoost, filter = filter, handleProperty = handler))
+        allowedUpdates.add(Update::setChatBoost.getJsonPropertyValue())
+    }
 
-        fun handleMessageReactionCount(
-            filter: suspend (MessageReactionCountUpdated) -> Boolean = { true },
-            handler: suspend KGram.(MessageReactionCountUpdated) -> Unit
-        ) {
-            updateHandlers.add(UpdatePropertyHandler(Update::getMessageReactionCount, filter = filter, handleProperty = handler))
-            allowedUpdates.add(Update::setMessageReactionCount)
-        }
+    fun handleRemovedChatBoost(
+        filter: suspend (ChatBoostRemoved) -> Boolean = { true },
+        handler: suspend KGram.(ChatBoostRemoved) -> Unit
+    ) {
+        updateHandlers.add(
+            UpdatePropertyHandler(
+                Update::getRemovedChatBoost,
+                filter = filter,
+                handleProperty = handler
+            )
+        )
+        allowedUpdates.add(Update::setRemovedChatBoost.getJsonPropertyValue())
+    }
 
-        fun handleChatBoost(
-            filter: suspend (ChatBoostUpdated) -> Boolean = { true },
-            handler: suspend KGram.(ChatBoostUpdated) -> Unit
-        ) {
-            updateHandlers.add(UpdatePropertyHandler(Update::getChatBoost, filter = filter, handleProperty = handler))
-            allowedUpdates.add(Update::setChatBoost)
-        }
+    fun handleBusinessConnection(
+        filter: suspend (BusinessConnection) -> Boolean = { true },
+        handler: suspend KGram.(BusinessConnection) -> Unit
+    ) {
+        updateHandlers.add(
+            UpdatePropertyHandler(
+                Update::getBusinessConnection,
+                filter = filter,
+                handleProperty = handler
+            )
+        )
+        allowedUpdates.add(Update::setBusinessConnection.getJsonPropertyValue())
+    }
 
-        fun handleRemovedChatBoost(
-            filter: suspend (ChatBoostRemoved) -> Boolean = { true },
-            handler: suspend KGram.(ChatBoostRemoved) -> Unit
-        ) {
-            updateHandlers.add(UpdatePropertyHandler(Update::getRemovedChatBoost, filter = filter, handleProperty = handler))
-            allowedUpdates.add(Update::setRemovedChatBoost)
-        }
+    fun handleBusinessMessage(
+        filter: suspend (Message) -> Boolean = { true },
+        handler: suspend KGram.(Message) -> Unit
+    ) {
+        updateHandlers.add(UpdatePropertyHandler(Update::getBusinessMessage, filter = filter, handleProperty = handler))
+        allowedUpdates.add(Update::setBusinessMessage.getJsonPropertyValue())
+    }
 
-        fun handleBusinessConnection(
-            filter: suspend (BusinessConnection) -> Boolean = { true },
-            handler: suspend KGram.(BusinessConnection) -> Unit
-        ) {
-            updateHandlers.add(UpdatePropertyHandler(Update::getBusinessConnection, filter = filter, handleProperty = handler))
-            allowedUpdates.add(Update::setBusinessConnection)
-        }
+    fun handleEditedBusinessMessage(
+        filter: suspend (Message) -> Boolean = { true },
+        handler: suspend KGram.(Message) -> Unit
+    ) {
+        updateHandlers.add(
+            UpdatePropertyHandler(
+                Update::getEditedBuinessMessage,
+                filter = filter,
+                handleProperty = handler
+            )
+        )
+        allowedUpdates.add(Update::setEditedBuinessMessage.getJsonPropertyValue())
+    }
 
-        fun handleBusinessMessage(
-            filter: suspend (Message) -> Boolean = { true },
-            handler: suspend KGram.(Message) -> Unit
-        ) {
-            updateHandlers.add(UpdatePropertyHandler(Update::getBusinessMessage, filter = filter, handleProperty = handler))
-            allowedUpdates.add(Update::setBusinessMessage)
-        }
+    fun handleDeletedBusinessMessages(
+        filter: suspend (BusinessMessagesDeleted) -> Boolean = { true },
+        handler: suspend KGram.(BusinessMessagesDeleted) -> Unit
+    ) {
+        updateHandlers.add(
+            UpdatePropertyHandler(
+                Update::getDeletedBusinessMessages,
+                filter = filter,
+                handleProperty = handler
+            )
+        )
+        allowedUpdates.add(Update::setDeletedBusinessMessages.getJsonPropertyValue())
+    }
 
-        fun handleEditedBusinessMessage(
-            filter: suspend (Message) -> Boolean = { true },
-            handler: suspend KGram.(Message) -> Unit
-        ) {
-            updateHandlers.add(UpdatePropertyHandler(Update::getEditedBuinessMessage, filter = filter, handleProperty = handler))
-            allowedUpdates.add(Update::setEditedBuinessMessage)
-        }
-
-        fun handleDeletedBusinessMessages(
-            filter: suspend (BusinessMessagesDeleted) -> Boolean = { true },
-            handler: suspend KGram.(BusinessMessagesDeleted) -> Unit
-        ) {
-            updateHandlers.add(UpdatePropertyHandler(Update::getDeletedBusinessMessages, filter = filter, handleProperty = handler))
-            allowedUpdates.add(Update::setDeletedBusinessMessages)
-        }
-
-        fun handlePaidMediaPurchased(
-            filter: suspend (PaidMediaPurchased) -> Boolean = { true },
-            handler: suspend KGram.(PaidMediaPurchased) -> Unit
-        ) {
-            updateHandlers.add(UpdatePropertyHandler(Update::getPaidMediaPurchased, filter = filter, handleProperty = handler))
-            allowedUpdates.add(Update::setPaidMediaPurchased)
-        }
+    fun handlePaidMediaPurchased(
+        filter: suspend (PaidMediaPurchased) -> Boolean = { true },
+        handler: suspend KGram.(PaidMediaPurchased) -> Unit
+    ) {
+        updateHandlers.add(
+            UpdatePropertyHandler(
+                Update::getPaidMediaPurchased,
+                filter = filter,
+                handleProperty = handler
+            )
+        )
+        allowedUpdates.add(Update::setPaidMediaPurchased.getJsonPropertyValue())
     }
 }
 
-suspend inline fun <T: Serializable, C : BotApiMethod<T>, B : BotApiMethod.BotApiMethodBuilder<out T, out C, *>> KGram.send(
+suspend inline fun <T : Serializable, C : BotApiMethod<T>, B : BotApiMethod.BotApiMethodBuilder<out T, out C, *>> KGram.send(
     getBuilder: () -> B,
     block: B.() -> Unit = {}
 ) = execute(getBuilder().apply(block).build())
