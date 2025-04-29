@@ -1,6 +1,6 @@
-package ru.danl.kgram.states.store
+package com.github.danl.kgram.states.store
 
-import ru.danl.kgram.states.StatesHolder
+import com.github.danl.kgram.states.StatesHolder
 
 /**
  * A simple in-memory [StateStore] implementation using a [HashMap].

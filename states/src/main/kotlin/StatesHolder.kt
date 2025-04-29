@@ -1,4 +1,4 @@
-package ru.danl.kgram.states
+package com.github.danl.kgram.states
 
 /**
  * A data class that holds the current and global state for a user.

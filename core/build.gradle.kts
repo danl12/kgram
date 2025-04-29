@@ -3,6 +3,7 @@ plugins {
     `maven-publish`
 }
 
+group = "com.github.danl"
 version = "0.1.1"
 
 repositories {
@@ -16,4 +17,12 @@ dependencies {
     implementation("org.telegram:telegrambots-client:8.3.0")
     implementation(kotlin("reflect"))
     testImplementation(kotlin("test"))
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+        }
+    }
 }

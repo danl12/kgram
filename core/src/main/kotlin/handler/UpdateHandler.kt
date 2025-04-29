@@ -1,4 +1,4 @@
-package ru.danl.kgram.handler
+package com.github.danl.kgram.handler
 
 import org.telegram.telegrambots.meta.api.objects.Update
 

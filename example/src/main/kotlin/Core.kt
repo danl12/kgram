@@ -1,16 +1,16 @@
-package ru.danl
+package com.github.danl
 
 import kotlinx.coroutines.runBlocking
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.objects.InputFile
 import org.telegram.telegrambots.meta.api.objects.message.Message
-import ru.danl.kgram.send
-import ru.danl.kgram.kGram
-import ru.danl.kgram.sendPhoto
-import ru.danl.kgram.util.inlineKeyboardMarkup
+import com.github.danl.kgram.send
+import com.github.danl.kgram.kGram
+import com.github.danl.kgram.sendPhoto
+import com.github.danl.kgram.util.inlineKeyboardMarkup
 
 fun main(): Unit = runBlocking {
-    kGram(token = "7437021878:AAHKZARtZpZGp767u5GJ7rqG9o9T6zFyC9A") {
+    kGram(token = "YOUR_BOT_TOKEN") {
         // Handle incoming messages
         handleMessage { message: Message ->
             sendPhoto {
