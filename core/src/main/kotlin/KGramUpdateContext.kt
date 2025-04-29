@@ -12,4 +12,10 @@ internal class KGramUpdateContext(
     companion object : CoroutineContext.Key<KGramUpdateContext>
 }
 
+/**
+ * Retrieves the [KGram] instance from the current coroutine context.
+ *
+ * @return The [KGram] instance associated with the current [KGramUpdateContext].
+ * @throws IllegalStateException If the [KGramUpdateContext] is not present in the coroutine context.
+ */
 suspend fun kGram() = requireNotNull(coroutineContext[KGramUpdateContext]).kGram
