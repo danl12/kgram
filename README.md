@@ -39,10 +39,10 @@ Then, add the KGram modules and the optional TelegramBots meta dependency:
 
 ```kotlin
 // Core module (required)
-implementation("com.github.danl:kgram-core:<version>")
+implementation("com.github.danl12.kgram:core:<version>")
 
 // States module (optional, for state management)
-implementation("com.github.danl:kgram-states:<version>")
+implementation("com.github.danl12.kgram:states:<version>")
 
 // Optional, needed if KGram uses old API
 implementation("org.telegram:telegrambots-meta:<telegrambots-version>")
