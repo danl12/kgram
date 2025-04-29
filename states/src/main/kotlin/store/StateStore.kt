@@ -3,26 +3,26 @@ package ru.danl.kgram.states.store
 import ru.danl.kgram.states.StatesHolder
 
 /**
- * A generic interface for storing and retrieving user-specific state in a Telegram bot.
+ * Interface for storing and retrieving user states in a Telegram bot.
  *
- * @param State The type representing the current user state.
- * @param GlobalState The type representing the global user state.
+ * @param State The type of the current state.
+ * @param GlobalState The type of the global state.
  */
 interface StateStore<State: Any, GlobalState: Any> {
 
     /**
-     * Retrieves the [StatesHolder] for the specified user.
+     * Retrieves the state for a user.
      *
-     * @param userId The unique identifier of the user.
-     * @return A [StatesHolder] containing the user's state and the global user's state, or `null` if no state is stored.
+     * @param userId The ID of the user.
+     * @return The [StatesHolder] containing the user's current and global state, or null if not found.
      */
     suspend fun get(userId: Long): StatesHolder<State, GlobalState>?
 
     /**
-     * Sets or updates the state for the specified user.
+     * Sets the state for a user.
      *
-     * @param userId The unique identifier of the user.
-     * @param state A [StatesHolder] containing the user's new state and the global user's state, or `null` to clear the stored state.
+     * @param userId The ID of the user.
+     * @param state The [StatesHolder] containing the user's state, or null to remove the state.
      */
     suspend fun set(userId: Long, state: StatesHolder<State, GlobalState>?)
 }

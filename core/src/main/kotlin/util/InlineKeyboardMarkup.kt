@@ -10,59 +10,44 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.SwitchIn
 import org.telegram.telegrambots.meta.api.objects.webapp.WebAppInfo
 
 /**
- * DSL entry point for building an [InlineKeyboardMarkup].
+ * Creates an [InlineKeyboardMarkup] using a builder pattern.
  *
- * Example usage:
- * ```
- * val markup = inlineKeyboardMarkup {
- *     row {
- *         button(text = "Click me", callbackData = "action_click")
- *     }
- *     button(text = "Single row button", url = "https://example.com")
- * }
- * ```
- *
- * @param block A configuration block used to define the inline keyboard layout.
- * @return A fully constructed [InlineKeyboardMarkup] object.
+ * @param block A lambda to configure the [InlineKeyboardMarkupBuilder].
+ * @return The configured [InlineKeyboardMarkup].
  */
 fun inlineKeyboardMarkup(block: InlineKeyboardMarkupBuilder.() -> Unit) =
     InlineKeyboardMarkupBuilder().apply(block).build()
 
 /**
- * Builder class for constructing [InlineKeyboardMarkup] layouts.
- *
- * This class allows creating a keyboard layout composed of multiple rows.
- * Each row can contain one or more inline buttons.
+ * A builder class for creating an [InlineKeyboardMarkup].
  */
 class InlineKeyboardMarkupBuilder internal constructor() {
 
     private val rows = mutableListOf<InlineKeyboardRow>()
 
     /**
-     * Adds a new row to the inline keyboard.
+     * Adds a row of buttons to the inline keyboard.
      *
-     * @param block A block to configure buttons within the row.
+     * @param block A lambda to configure the [InlineKeyboardRowBuilder].
      */
     fun row(block: InlineKeyboardRowBuilder.() -> Unit) {
         rows.add(InlineKeyboardRowBuilder().apply(block).build())
     }
 
     /**
-     * Adds a new row containing a single button.
+     * Adds a single button as a row to the inline keyboard.
      *
-     * This is a shorthand for adding a row with one button.
-     *
-     * @param text The button text.
-     * @param url HTTP or tg:// URL to be opened when the button is pressed.
-     * @param callbackData Data to be sent in a callback query to the bot when button is pressed.
-     * @param callbackGame Description of the game that will be launched when the user presses the button.
-     * @param switchInlineQuery If set, pressing the button will prompt the user to select one of their chats, open that chat and insert the bot‘s username and the specified inline query in the input field.
-     * @param switchInlineQueryCurrentChat Similar to switchInlineQuery, but inserts the bot's username and query in the current chat’s input field.
-     * @param pay If true, the button will be a Pay button.
-     * @param loginUrl An HTTPS URL used to automatically authorize the user.
-     * @param webApp Information about the Web App to launch when the user presses the button.
-     * @param switchInlineQueryChosenChat If set, allows the user to switch to a different chat for inline queries.
-     * @param copyText If set, allows copying text to clipboard.
+     * @param text The text displayed on the button.
+     * @param url The URL to open when the button is clicked.
+     * @param callbackData The data sent in a callback query when the button is clicked.
+     * @param callbackGame The game to start when the button is clicked.
+     * @param switchInlineQuery The inline query to switch to.
+     * @param switchInlineQueryCurrentChat The inline query to switch to in the current chat.
+     * @param pay Whether the button is a payment button.
+     * @param loginUrl The login URL for authentication.
+     * @param webApp The web app to open.
+     * @param switchInlineQueryChosenChat The inline query for chosen chats.
+     * @param copyText The text to copy when the button is clicked.
      */
     fun button(
         text: String,
@@ -95,36 +80,34 @@ class InlineKeyboardMarkupBuilder internal constructor() {
     }
 
     /**
-     * Builds and returns the final [InlineKeyboardMarkup] instance.
+     * Builds the [InlineKeyboardMarkup] with the configured rows.
      *
-     * @return A fully constructed inline keyboard markup object.
+     * @return The constructed [InlineKeyboardMarkup].
      */
     fun build() = InlineKeyboardMarkup.builder().keyboard(rows).build()
 }
 
 /**
- * Builder class for creating a single row of inline keyboard buttons.
- *
- * Each row consists of one or more [InlineKeyboardButton]s.
+ * A builder class for creating a row of [InlineKeyboardButton]s.
  */
 class InlineKeyboardRowBuilder internal constructor() {
 
     private val buttons = mutableListOf<InlineKeyboardButton>()
 
     /**
-     * Adds a button to the current row.
+     * Adds a button to the row.
      *
-     * @param text The button text.
-     * @param url HTTP or tg:// URL to be opened when the button is pressed.
-     * @param callbackData Data to be sent in a callback query to the bot when button is pressed.
-     * @param callbackGame Description of the game that will be launched when the user presses the button.
-     * @param switchInlineQuery If set, pressing the button will prompt the user to select one of their chats, open that chat and insert the bot‘s username and the specified inline query in the input field.
-     * @param switchInlineQueryCurrentChat Similar to switchInlineQuery, but inserts the bot's username and query in the current chat’s input field.
-     * @param pay If true, the button will be a Pay button.
-     * @param loginUrl An HTTPS URL used to automatically authorize the user.
-     * @param webApp Information about the Web App to launch when the user presses the button.
-     * @param switchInlineQueryChosenChat If set, allows the user to switch to a different chat for inline queries.
-     * @param copyText If set, allows copying text to clipboard.
+     * @param text The text displayed on the button.
+     * @param url The URL to open when the button is clicked.
+     * @param callbackData The data sent in a callback query when the button is clicked.
+     * @param callbackGame The game to start when the button is clicked.
+     * @param switchInlineQuery The inline query to switch to.
+     * @param switchInlineQueryCurrentChat The inline query to switch to in the current chat.
+     * @param pay Whether the button is a payment button.
+     * @param loginUrl The login URL for authentication.
+     * @param webApp The web app to open.
+     * @param switchInlineQueryChosenChat The inline query for chosen chats.
+     * @param copyText The text to copy when the button is clicked.
      */
     fun button(
         text: String,
@@ -157,9 +140,9 @@ class InlineKeyboardRowBuilder internal constructor() {
     }
 
     /**
-     * Builds and returns a row containing the added buttons.
+     * Builds the [InlineKeyboardRow] with the configured buttons.
      *
-     * @return An [InlineKeyboardRow] containing the buttons defined in this builder.
+     * @return The constructed [InlineKeyboardRow].
      */
     fun build() = InlineKeyboardRow(buttons.toList())
 }

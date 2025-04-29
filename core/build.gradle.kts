@@ -1,6 +1,5 @@
 plugins {
     kotlin("jvm")
-    `maven-publish`
 }
 
 group = "ru.danl"
@@ -17,16 +16,4 @@ dependencies {
     implementation("org.telegram:telegrambots-client:8.3.0")
     implementation(kotlin("reflect"))
     testImplementation(kotlin("test"))
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            groupId = "ru.danl.kgram"
-            artifactId = "core"
-            version = "0.1"
-
-            from(components["java"])
-        }
-    }
 }

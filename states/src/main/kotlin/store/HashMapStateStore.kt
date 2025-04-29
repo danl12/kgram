@@ -3,31 +3,28 @@ package ru.danl.kgram.states.store
 import ru.danl.kgram.states.StatesHolder
 
 /**
- * An in-memory implementation of [StateStore] using a [HashMap] to store state per user.
+ * A simple in-memory [StateStore] implementation using a [HashMap].
  *
- * This implementation is suitable for development or simple use cases where persistent
- * storage is not required. The state will be lost when the application is stopped or restarted.
- *
- * @param State The type representing the current user state.
- * @param GlobalState The type representing the global user state.
+ * @param State The type of the current state.
+ * @param GlobalState The type of the global state.
  */
 class HashMapStateStore<State : Any, GlobalState : Any> : StateStore<State, GlobalState> {
 
     private val hashMap = hashMapOf<Long, StatesHolder<State, GlobalState>>()
 
     /**
-     * Retrieves the current state for the specified user from memory.
+     * Retrieves the state for a user.
      *
-     * @param userId The unique identifier of the user.
-     * @return A [StatesHolder] containing the user's state and the global user's state, or `null` if no state is stored.
+     * @param userId The ID of the user.
+     * @return The [StatesHolder] containing the user's current and global state, or null if not found.
      */
     override suspend fun get(userId: Long): StatesHolder<State, GlobalState>? = hashMap[userId]
 
     /**
-     * Stores or removes the state for the specified user in memory.
+     * Sets the state for a user.
      *
-     * @param userId The unique identifier of the user.
-     * @param state A [StatesHolder] containing the user's new state and global user's state, or `null` to remove the stored state.
+     * @param userId The ID of the user.
+     * @param state The [StatesHolder] containing the user's state, or null to remove the state.
      */
     override suspend fun set(userId: Long, state: StatesHolder<State, GlobalState>?) {
         if (state == null) {

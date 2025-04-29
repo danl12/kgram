@@ -38,7 +38,7 @@ import java.io.Serializable
 import kotlin.reflect.KFunction2
 
 /**
- * Creates a new instance of [KGram] with the provided token and applies the configuration block.
+ * Creates and configures a [KGram] instance for interacting with the Telegram Bot API.
  *
  * @param token The Telegram Bot API token.
  * @param configure A lambda to configure the [KGram] instance.
@@ -48,9 +48,10 @@ fun kGram(token: String, configure: KGram.() -> Unit) =
     KGram(token = token).apply(configure)
 
 /**
- * A class that provides a Kotlin-based interface for interacting with the Telegram Bot API using long polling.
+ * A class for interacting with the Telegram Bot API using a long-polling mechanism.
+ * Provides methods to handle updates and execute bot API methods.
  *
- * @param token The Telegram Bot API token used for authentication.
+ * @param token The Telegram Bot API token.
  */
 class KGram internal constructor(
     private val token: String
@@ -71,10 +72,7 @@ class KGram internal constructor(
         (annotations.single { it.annotationClass == JsonProperty::class } as JsonProperty).value
 
     /**
-     * Starts the bot using long polling to receive updates from Telegram.
-     * The bot will process updates and invoke registered handlers.
-     *
-     * @throws CancellationException If the coroutine is cancelled, the bot session is closed.
+     * Starts the bot and begins processing updates using long polling.
      */
     suspend fun start() = suspendCancellableCoroutine<Unit> { continuation ->
         val botSession = telegramBotsLongPollingApplication
@@ -108,179 +106,178 @@ class KGram internal constructor(
     }
 
     /**
-     * Executes a generic Telegram Bot API method and returns the result.
+     * Executes a Telegram Bot API method.
      *
-     * @param T The type of the result returned by the API method.
      * @param botApiMethod The API method to execute.
-     * @return The result of the API method.
+     * @return The result of the API method execution.
      */
     suspend fun <T : Serializable> execute(botApiMethod: BotApiMethod<T>) =
         telegramClient.executeAsync(botApiMethod).await()
 
     /**
-     * Sends a document to a Telegram chat.
+     * Executes a [SendDocument] API method.
      *
      * @param sendDocument The document to send.
-     * @return The result of the API call.
+     * @return The sent message.
      */
     suspend fun execute(sendDocument: SendDocument) =
         telegramClient.executeAsync(sendDocument).await()
 
     /**
-     * Sends a photo to a Telegram chat.
+     * Executes a [SendPhoto] API method.
      *
      * @param sendPhoto The photo to send.
-     * @return The result of the API call.
+     * @return The sent message.
      */
     suspend fun execute(sendPhoto: SendPhoto) =
         telegramClient.executeAsync(sendPhoto).await()
 
     /**
-     * Sets a webhook for receiving updates.
+     * Executes a [SetWebhook] API method.
      *
-     * @param setWebhook The webhook configuration.
-     * @return The result of the API call.
+     * @param setWebhook The webhook to set.
+     * @return The result of the webhook setup.
      */
     suspend fun execute(setWebhook: SetWebhook) =
         telegramClient.executeAsync(setWebhook).await()
 
     /**
-     * Sends a video to a Telegram chat.
+     * Executes a [SendVideo] API method.
      *
      * @param sendVideo The video to send.
-     * @return The result of the API call.
+     * @return The sent message.
      */
     suspend fun execute(sendVideo: SendVideo) =
         telegramClient.executeAsync(sendVideo).await()
 
     /**
-     * Sends a video note to a Telegram chat.
+     * Executes a [SendVideoNote] API method.
      *
      * @param sendVideoNote The video note to send.
-     * @return The result of the API call.
+     * @return The sent message.
      */
     suspend fun execute(sendVideoNote: SendVideoNote) =
         telegramClient.executeAsync(sendVideoNote).await()
 
     /**
-     * Sends a sticker to a Telegram chat.
+     * Executes a [SendSticker] API method.
      *
      * @param sendSticker The sticker to send.
-     * @return The result of the API call.
+     * @return The sent message.
      */
     suspend fun execute(sendSticker: SendSticker) =
         telegramClient.executeAsync(sendSticker).await()
 
     /**
-     * Sends an audio file to a Telegram chat.
+     * Executes a [SendAudio] API method.
      *
-     * @param sendAudio The audio file to send.
-     * @return The result of the API call.
+     * @param sendAudio The audio to send.
+     * @return The sent message.
      */
     suspend fun execute(sendAudio: SendAudio) =
         telegramClient.executeAsync(sendAudio).await()
 
     /**
-     * Sends a voice message to a Telegram chat.
+     * Executes a [SendVoice] API method.
      *
      * @param sendVoice The voice message to send.
-     * @return The result of the API call.
+     * @return The sent message.
      */
     suspend fun execute(sendVoice: SendVoice) =
         telegramClient.executeAsync(sendVoice).await()
 
     /**
-     * Sends paid media to a Telegram chat.
+     * Executes a [SendPaidMedia] API method.
      *
      * @param sendPaidMedia The paid media to send.
-     * @return The result of the API call.
+     * @return The sent message.
      */
     suspend fun execute(sendPaidMedia: SendPaidMedia) =
         telegramClient.executeAsync(sendPaidMedia).await()
 
     /**
-     * Sends a media group to a Telegram chat.
+     * Executes a [SendMediaGroup] API method.
      *
      * @param sendMediaGroup The media group to send.
-     * @return The result of the API call.
+     * @return The sent messages.
      */
     suspend fun execute(sendMediaGroup: SendMediaGroup) =
         telegramClient.executeAsync(sendMediaGroup).await()
 
     /**
-     * Sends an animation to a Telegram chat.
+     * Executes a [SendAnimation] API method.
      *
      * @param sendAnimation The animation to send.
-     * @return The result of the API call.
+     * @return The sent message.
      */
     suspend fun execute(sendAnimation: SendAnimation) =
         telegramClient.executeAsync(sendAnimation).await()
 
     /**
-     * Sets a chat photo for a Telegram chat.
+     * Executes a [SetChatPhoto] API method.
      *
      * @param setChatPhoto The chat photo to set.
-     * @return The result of the API call.
+     * @return The result of the chat photo setup.
      */
     suspend fun execute(setChatPhoto: SetChatPhoto) =
         telegramClient.executeAsync(setChatPhoto).await()
 
     /**
-     * Adds a sticker to an existing sticker set.
+     * Executes an [AddStickerToSet] API method.
      *
-     * @param addStickerToSet The sticker to add.
-     * @return The result of the API call.
+     * @param addStickerToSet The sticker to add to a set.
+     * @return The result of the sticker addition.
      */
     suspend fun execute(addStickerToSet: AddStickerToSet) =
         telegramClient.executeAsync(addStickerToSet).await()
 
     /**
-     * Replaces a sticker in an existing sticker set.
+     * Executes a [ReplaceStickerInSet] API method.
      *
-     * @param replaceStickerInSet The sticker replacement details.
-     * @return The result of the API call.
+     * @param replaceStickerInSet The sticker to replace in a set.
+     * @return The result of the sticker replacement.
      */
     suspend fun execute(replaceStickerInSet: ReplaceStickerInSet) =
         telegramClient.executeAsync(replaceStickerInSet).await()
 
     /**
-     * Sets a thumbnail for a sticker set.
+     * Executes a [SetStickerSetThumbnail] API method.
      *
-     * @param setStickerSetThumbnail The thumbnail to set.
-     * @return The result of the API call.
+     * @param setStickerSetThumbnail The thumbnail to set for a sticker set.
+     * @return The result of the thumbnail setup.
      */
     suspend fun execute(setStickerSetThumbnail: SetStickerSetThumbnail) =
         telegramClient.executeAsync(setStickerSetThumbnail).await()
 
     /**
-     * Creates a new sticker set.
+     * Executes a [CreateNewStickerSet] API method.
      *
-     * @param createNewStickerSet The sticker set to create.
-     * @return The result of the API call.
+     * @param createNewStickerSet The new sticker set to create.
+     * @return The result of the sticker set creation.
      */
     suspend fun execute(createNewStickerSet: CreateNewStickerSet) =
         telegramClient.executeAsync(createNewStickerSet).await()
 
     /**
-     * Uploads a sticker file to Telegram.
+     * Executes an [UploadStickerFile] API method.
      *
      * @param uploadStickerFile The sticker file to upload.
-     * @return The result of the API call.
+     * @return The uploaded file.
      */
     suspend fun execute(uploadStickerFile: UploadStickerFile) =
         telegramClient.executeAsync(uploadStickerFile).await()
 
     /**
-     * Edits the media of an existing message.
+     * Executes an [EditMessageMedia] API method.
      *
-     * @param editMessageMedia The media edit details.
-     * @return The result of the API call.
+     * @param editMessageMedia The media to edit in a message.
+     * @return The edited message.
      */
     suspend fun execute(editMessageMedia: EditMessageMedia) =
         telegramClient.executeAsync(editMessageMedia).await()
 
     /**
-     * Downloads a file from Telegram by its file object.
+     * Downloads a file from Telegram servers.
      *
      * @param file The file to download.
      * @return The downloaded file content.
@@ -289,7 +286,7 @@ class KGram internal constructor(
         telegramClient.downloadFileAsync(file).await()
 
     /**
-     * Downloads a file from Telegram by its file path.
+     * Downloads a file from Telegram servers using its file path.
      *
      * @param filePath The path of the file to download.
      * @return The downloaded file content.
@@ -298,19 +295,19 @@ class KGram internal constructor(
         telegramClient.downloadFileAsync(filePath).await()
 
     /**
-     * Downloads a file from Telegram as a stream by its file object.
+     * Downloads a file from Telegram servers as a stream.
      *
      * @param file The file to download.
-     * @return The streamed file content.
+     * @return The file content as a stream.
      */
     suspend fun downloadFileAsStream(file: File) =
         telegramClient.downloadFileAsStreamAsync(file).await()
 
     /**
-     * Downloads a file from Telegram as a stream by its file path.
+     * Downloads a file from Telegram servers as a stream using its file path.
      *
      * @param filePath The path of the file to download.
-     * @return The streamed file content.
+     * @return The file content as a stream.
      */
     suspend fun downloadFileAsStream(filePath: String) =
         telegramClient.downloadFileAsStreamAsync(filePath).await()
@@ -344,9 +341,9 @@ class KGram internal constructor(
     }
 
     /**
-     * Registers a handler for chosen inline query results.
+     * Registers a handler for chosen inline queries.
      *
-     * @param filter A suspend function to filter chosen inline queries. Defaults to accepting all.
+     * @param filter A suspend function to filter chosen inline queries. Defaults to accepting all queries.
      * @param handler A suspend function to handle the chosen inline query.
      */
     fun handleChosenInlineQuery(
@@ -366,7 +363,7 @@ class KGram internal constructor(
     /**
      * Registers a handler for callback queries.
      *
-     * @param filter A suspend function to filter callback queries. Defaults to accepting all.
+     * @param filter A suspend function to filter callback queries. Defaults to accepting all queries.
      * @param handler A suspend function to handle the callback query.
      */
     fun handleCallbackQuery(
@@ -380,7 +377,7 @@ class KGram internal constructor(
     /**
      * Registers a handler for edited messages.
      *
-     * @param filter A suspend function to filter edited messages. Defaults to accepting all.
+     * @param filter A suspend function to filter edited messages. Defaults to accepting all messages.
      * @param handler A suspend function to handle the edited message.
      */
     fun handleEditedMessage(
@@ -394,7 +391,7 @@ class KGram internal constructor(
     /**
      * Registers a handler for channel posts.
      *
-     * @param filter A suspend function to filter channel posts. Defaults to accepting all.
+     * @param filter A suspend function to filter channel posts. Defaults to accepting all posts.
      * @param handler A suspend function to handle the channel post.
      */
     fun handleChannelPost(
@@ -408,7 +405,7 @@ class KGram internal constructor(
     /**
      * Registers a handler for edited channel posts.
      *
-     * @param filter A suspend function to filter edited channel posts. Defaults to accepting all.
+     * @param filter A suspend function to filter edited channel posts. Defaults to accepting all posts.
      * @param handler A suspend function to handle the edited channel post.
      */
     fun handleEditedChannelPost(
@@ -428,7 +425,7 @@ class KGram internal constructor(
     /**
      * Registers a handler for shipping queries.
      *
-     * @param filter A suspend function to filter shipping queries. Defaults to accepting all.
+     * @param filter A suspend function to filter shipping queries. Defaults to accepting all queries.
      * @param handler A suspend function to handle the shipping query.
      */
     fun handleShippingQuery(
@@ -442,7 +439,7 @@ class KGram internal constructor(
     /**
      * Registers a handler for pre-checkout queries.
      *
-     * @param filter A suspend function to filter pre-checkout queries. Defaults to accepting all.
+     * @param filter A suspend function to filter pre-checkout queries. Defaults to accepting all queries.
      * @param handler A suspend function to handle the pre-checkout query.
      */
     fun handlePreCheckoutQuery(
@@ -462,7 +459,7 @@ class KGram internal constructor(
     /**
      * Registers a handler for polls.
      *
-     * @param filter A suspend function to filter polls. Defaults to accepting all.
+     * @param filter A suspend function to filter polls. Defaults to accepting all polls.
      * @param handler A suspend function to handle the poll.
      */
     fun handlePoll(
@@ -476,7 +473,7 @@ class KGram internal constructor(
     /**
      * Registers a handler for poll answers.
      *
-     * @param filter A suspend function to filter poll answers. Defaults to accepting all.
+     * @param filter A suspend function to filter poll answers. Defaults to accepting all answers.
      * @param handler A suspend function to handle the poll answer.
      */
     fun handlePollAnswer(
@@ -490,7 +487,7 @@ class KGram internal constructor(
     /**
      * Registers a handler for updates to the bot's chat member status.
      *
-     * @param filter A suspend function to filter chat member updates. Defaults to accepting all.
+     * @param filter A suspend function to filter chat member updates. Defaults to accepting all updates.
      * @param handler A suspend function to handle the chat member update.
      */
     fun handleMyChatMember(
@@ -502,9 +499,9 @@ class KGram internal constructor(
     }
 
     /**
-     * Registers a handler for updates to a chat member's status.
+     * Registers a handler for updates to chat members.
      *
-     * @param filter A suspend function to filter chat member updates. Defaults to accepting all.
+     * @param filter A suspend function to filter chat member updates. Defaults to accepting all updates.
      * @param handler A suspend function to handle the chat member update.
      */
     fun handleChatMember(
@@ -518,7 +515,7 @@ class KGram internal constructor(
     /**
      * Registers a handler for chat join requests.
      *
-     * @param filter A suspend function to filter chat join requests. Defaults to accepting all.
+     * @param filter A suspend function to filter chat join requests. Defaults to accepting all requests.
      * @param handler A suspend function to handle the chat join request.
      */
     fun handleChatJoinRequest(
@@ -530,10 +527,10 @@ class KGram internal constructor(
     }
 
     /**
-     * Registers a handler for message reaction updates.
+     * Registers a handler for message reactions.
      *
-     * @param filter A suspend function to filter message reaction updates. Defaults to accepting all.
-     * @param handler A suspend function to handle the message reaction update.
+     * @param filter A suspend function to filter message reactions. Defaults to accepting all reactions.
+     * @param handler A suspend function to handle the message reaction.
      */
     fun handleMessageReaction(
         filter: suspend (MessageReactionUpdated) -> Boolean = { true },
@@ -544,10 +541,10 @@ class KGram internal constructor(
     }
 
     /**
-     * Registers a handler for message reaction count updates.
+     * Registers a handler for message reaction counts.
      *
-     * @param filter A suspend function to filter reaction count updates. Defaults to accepting all.
-     * @param handler A suspend function to handle the reaction count update.
+     * @param filter A suspend function to filter message reaction count updates. Defaults to accepting all updates.
+     * @param handler A suspend function to handle the message reaction count update.
      */
     fun handleMessageReactionCount(
         filter: suspend (MessageReactionCountUpdated) -> Boolean = { true },
@@ -566,7 +563,7 @@ class KGram internal constructor(
     /**
      * Registers a handler for chat boost updates.
      *
-     * @param filter A suspend function to filter chat boost updates. Defaults to accepting all.
+     * @param filter A suspend function to filter chat boost updates. Defaults to accepting all updates.
      * @param handler A suspend function to handle the chat boost update.
      */
     fun handleChatBoost(
@@ -580,7 +577,7 @@ class KGram internal constructor(
     /**
      * Registers a handler for removed chat boosts.
      *
-     * @param filter A suspend function to filter removed chat boosts. Defaults to accepting all.
+     * @param filter A suspend function to filter removed chat boosts. Defaults to accepting all boosts.
      * @param handler A suspend function to handle the removed chat boost.
      */
     fun handleRemovedChatBoost(
@@ -600,7 +597,7 @@ class KGram internal constructor(
     /**
      * Registers a handler for business connections.
      *
-     * @param filter A suspend function to filter business connections. Defaults to accepting all.
+     * @param filter A suspend function to filter business connections. Defaults to accepting all connections.
      * @param handler A suspend function to handle the business connection.
      */
     fun handleBusinessConnection(
@@ -620,7 +617,7 @@ class KGram internal constructor(
     /**
      * Registers a handler for business messages.
      *
-     * @param filter A suspend function to filter business messages. Defaults to accepting all.
+     * @param filter A suspend function to filter business messages. Defaults to accepting all messages.
      * @param handler A suspend function to handle the business message.
      */
     fun handleBusinessMessage(
@@ -634,7 +631,7 @@ class KGram internal constructor(
     /**
      * Registers a handler for edited business messages.
      *
-     * @param filter A suspend function to filter edited business messages. Defaults to accepting all.
+     * @param filter A suspend function to filter edited business messages. Defaults to accepting all messages.
      * @param handler A suspend function to handle the edited business message.
      */
     fun handleEditedBusinessMessage(
@@ -654,7 +651,7 @@ class KGram internal constructor(
     /**
      * Registers a handler for deleted business messages.
      *
-     * @param filter A suspend function to filter deleted business messages. Defaults to accepting all.
+     * @param filter A suspend function to filter deleted business messages. Defaults to accepting all deletions.
      * @param handler A suspend function to handle the deleted business messages.
      */
     fun handleDeletedBusinessMessages(
@@ -674,7 +671,7 @@ class KGram internal constructor(
     /**
      * Registers a handler for purchased paid media.
      *
-     * @param filter A suspend function to filter purchased paid media. Defaults to accepting all.
+     * @param filter A suspend function to filter purchased paid media. Defaults to accepting all purchases.
      * @param handler A suspend function to handle the purchased paid media.
      */
     fun handlePaidMediaPurchased(
@@ -695,12 +692,9 @@ class KGram internal constructor(
 /**
  * Sends a Telegram Bot API method using a builder pattern.
  *
- * @param T The type of the result returned by the API method.
- * @param C The type of the API method.
- * @param B The builder type for the API method.
- * @param getBuilder A function that provides the builder instance.
+ * @param getBuilder A function to retrieve the builder for the API method.
  * @param block A lambda to configure the builder.
- * @return The result of the API method.
+ * @return The result of the API method execution.
  */
 suspend inline fun <T : Serializable, C : BotApiMethod<T>, B : BotApiMethod.BotApiMethodBuilder<out T, out C, *>> KGram.send(
     getBuilder: () -> B,
@@ -711,7 +705,7 @@ suspend inline fun <T : Serializable, C : BotApiMethod<T>, B : BotApiMethod.BotA
  * Sends a document using a builder pattern.
  *
  * @param block A lambda to configure the [SendDocument] builder.
- * @return The result of the API call.
+ * @return The sent message.
  */
 suspend fun KGram.sendDocument(block: SendDocument.SendDocumentBuilder<*, *> .() -> Unit) =
     execute(SendDocument.builder().apply(block).build())
@@ -720,7 +714,7 @@ suspend fun KGram.sendDocument(block: SendDocument.SendDocumentBuilder<*, *> .()
  * Sends a photo using a builder pattern.
  *
  * @param block A lambda to configure the [SendPhoto] builder.
- * @return The result of the API call.
+ * @return The sent message.
  */
 suspend fun KGram.sendPhoto(block: SendPhoto.SendPhotoBuilder<*, *> .() -> Unit) =
     execute(SendPhoto.builder().apply(block).build())
@@ -729,7 +723,7 @@ suspend fun KGram.sendPhoto(block: SendPhoto.SendPhotoBuilder<*, *> .() -> Unit)
  * Sets a webhook using a builder pattern.
  *
  * @param block A lambda to configure the [SetWebhook] builder.
- * @return The result of the API call.
+ * @return The result of the webhook setup.
  */
 suspend fun KGram.setWebhook(block: SetWebhook.SetWebhookBuilder<*, *> .() -> Unit) =
     execute(SetWebhook.builder().apply(block).build())
@@ -738,7 +732,7 @@ suspend fun KGram.setWebhook(block: SetWebhook.SetWebhookBuilder<*, *> .() -> Un
  * Sends a video using a builder pattern.
  *
  * @param block A lambda to configure the [SendVideo] builder.
- * @return The result of the API call.
+ * @return The sent message.
  */
 suspend fun KGram.sendVideo(block: SendVideo.SendVideoBuilder<*, *> .() -> Unit) =
     execute(SendVideo.builder().apply(block).build())
@@ -747,7 +741,7 @@ suspend fun KGram.sendVideo(block: SendVideo.SendVideoBuilder<*, *> .() -> Unit)
  * Sends a video note using a builder pattern.
  *
  * @param block A lambda to configure the [SendVideoNote] builder.
- * @return The result of the API call.
+ * @return The sent message.
  */
 suspend fun KGram.sendVideoNote(block: SendVideoNote.SendVideoNoteBuilder<*, *> .() -> Unit) =
     execute(SendVideoNote.builder().apply(block).build())
@@ -756,7 +750,7 @@ suspend fun KGram.sendVideoNote(block: SendVideoNote.SendVideoNoteBuilder<*, *> 
  * Sends a sticker using a builder pattern.
  *
  * @param block A lambda to configure the [SendSticker] builder.
- * @return The result of the API call.
+ * @return The sent message.
  */
 suspend fun KGram.sendSticker(block: SendSticker.SendStickerBuilder<*, *> .() -> Unit) =
     execute(SendSticker.builder().apply(block).build())
@@ -765,7 +759,7 @@ suspend fun KGram.sendSticker(block: SendSticker.SendStickerBuilder<*, *> .() ->
  * Sends an audio file using a builder pattern.
  *
  * @param block A lambda to configure the [SendAudio] builder.
- * @return The result of the API call.
+ * @return The sent message.
  */
 suspend fun KGram.sendAudio(block: SendAudio.SendAudioBuilder<*, *> .() -> Unit) =
     execute(SendAudio.builder().apply(block).build())
@@ -774,7 +768,7 @@ suspend fun KGram.sendAudio(block: SendAudio.SendAudioBuilder<*, *> .() -> Unit)
  * Sends a voice message using a builder pattern.
  *
  * @param block A lambda to configure the [SendVoice] builder.
- * @return The result of the API call.
+ * @return The sent message.
  */
 suspend fun KGram.sendVoice(block: SendVoice.SendVoiceBuilder<*, *> .() -> Unit) =
     execute(SendVoice.builder().apply(block).build())
@@ -783,7 +777,7 @@ suspend fun KGram.sendVoice(block: SendVoice.SendVoiceBuilder<*, *> .() -> Unit)
  * Sends paid media using a builder pattern.
  *
  * @param block A lambda to configure the [SendPaidMedia] builder.
- * @return The result of the API call.
+ * @return The sent message.
  */
 suspend fun KGram.sendPaidMedia(block: SendPaidMedia.SendPaidMediaBuilder<*, *> .() -> Unit) =
     execute(SendPaidMedia.builder().apply(block).build())
@@ -792,7 +786,7 @@ suspend fun KGram.sendPaidMedia(block: SendPaidMedia.SendPaidMediaBuilder<*, *> 
  * Sends a media group using a builder pattern.
  *
  * @param block A lambda to configure the [SendMediaGroup] builder.
- * @return The result of the API call.
+ * @return The sent messages.
  */
 suspend fun KGram.sendMediaGroup(block: SendMediaGroup.SendMediaGroupBuilder<*, *> .() -> Unit) =
     execute(SendMediaGroup.builder().apply(block).build())
@@ -801,7 +795,7 @@ suspend fun KGram.sendMediaGroup(block: SendMediaGroup.SendMediaGroupBuilder<*, 
  * Sends an animation using a builder pattern.
  *
  * @param block A lambda to configure the [SendAnimation] builder.
- * @return The result of the API call.
+ * @return The sent message.
  */
 suspend fun KGram.sendAnimation(block: SendAnimation.SendAnimationBuilder<*, *> .() -> Unit) =
     execute(SendAnimation.builder().apply(block).build())
@@ -810,7 +804,7 @@ suspend fun KGram.sendAnimation(block: SendAnimation.SendAnimationBuilder<*, *> 
  * Sets a chat photo using a builder pattern.
  *
  * @param block A lambda to configure the [SetChatPhoto] builder.
- * @return The result of the API call.
+ * @return The result of the chat photo setup.
  */
 suspend fun KGram.setChatPhoto(block: SetChatPhoto.SetChatPhotoBuilder<*, *> .() -> Unit) =
     execute(SetChatPhoto.builder().apply(block).build())
@@ -819,7 +813,7 @@ suspend fun KGram.setChatPhoto(block: SetChatPhoto.SetChatPhotoBuilder<*, *> .()
  * Adds a sticker to a set using a builder pattern.
  *
  * @param block A lambda to configure the [AddStickerToSet] builder.
- * @return The result of the API call.
+ * @return The result of the sticker addition.
  */
 suspend fun KGram.addStickerToSet(block: AddStickerToSet.AddStickerToSetBuilder<*, *> .() -> Unit) =
     execute(AddStickerToSet.builder().apply(block).build())
@@ -828,7 +822,7 @@ suspend fun KGram.addStickerToSet(block: AddStickerToSet.AddStickerToSetBuilder<
  * Replaces a sticker in a set using a builder pattern.
  *
  * @param block A lambda to configure the [ReplaceStickerInSet] builder.
- * @return The result of the API call.
+ * @return The result of the sticker replacement.
  */
 suspend fun KGram.replaceStickerInSet(block: ReplaceStickerInSet.ReplaceStickerInSetBuilder<*, *> .() -> Unit) =
     execute(ReplaceStickerInSet.builder().apply(block).build())
@@ -837,7 +831,7 @@ suspend fun KGram.replaceStickerInSet(block: ReplaceStickerInSet.ReplaceStickerI
  * Sets a sticker set thumbnail using a builder pattern.
  *
  * @param block A lambda to configure the [SetStickerSetThumbnail] builder.
- * @return The result of the API call.
+ * @return The result of the thumbnail setup.
  */
 suspend fun KGram.setStickerSetThumbnail(block: SetStickerSetThumbnail.SetStickerSetThumbnailBuilder<*, *> .() -> Unit) =
     execute(SetStickerSetThumbnail.builder().apply(block).build())
@@ -846,7 +840,7 @@ suspend fun KGram.setStickerSetThumbnail(block: SetStickerSetThumbnail.SetSticke
  * Creates a new sticker set using a builder pattern.
  *
  * @param block A lambda to configure the [CreateNewStickerSet] builder.
- * @return The result of the API call.
+ * @return The result of the sticker set creation.
  */
 suspend fun KGram.createNewStickerSet(block: CreateNewStickerSet.CreateNewStickerSetBuilder<*, *> .() -> Unit) =
     execute(CreateNewStickerSet.builder().apply(block).build())
@@ -855,7 +849,7 @@ suspend fun KGram.createNewStickerSet(block: CreateNewStickerSet.CreateNewSticke
  * Uploads a sticker file using a builder pattern.
  *
  * @param block A lambda to configure the [UploadStickerFile] builder.
- * @return The result of the API call.
+ * @return The uploaded file.
  */
 suspend fun KGram.uploadStickerFile(block: UploadStickerFile.UploadStickerFileBuilder<*, *> .() -> Unit) =
     execute(UploadStickerFile.builder().apply(block).build())
@@ -864,7 +858,7 @@ suspend fun KGram.uploadStickerFile(block: UploadStickerFile.UploadStickerFileBu
  * Edits message media using a builder pattern.
  *
  * @param block A lambda to configure the [EditMessageMedia] builder.
- * @return The result of the API call.
+ * @return The edited message.
  */
 suspend fun KGram.editMessageMedia(block: EditMessageMedia.EditMessageMediaBuilder<*, *> .() -> Unit) =
     execute(EditMessageMedia.builder().apply(block).build())

@@ -7,14 +7,13 @@ import ru.danl.kgram.states.store.StateStore
 import kotlin.reflect.KClass
 
 /**
- * Configures and initializes state management for the [KGram] Telegram bot instance.
+ * Configures state management for a [KGram] instance.
  *
- * This extension function provides a DSL for defining state-based handlers using a customizable
- * [StateStore]. By default, it uses an in-memory [HashMapStateStore].
- *
- * @param stateStore The storage implementation used for persisting state across user sessions.
- * @param configure A configuration block where you can register state handlers.
- * @return An instance of [States] used for managing current and global states.
+ * @param State The type of the current state.
+ * @param GlobalState The type of the global state.
+ * @param stateStore The [StateStore] to use for state persistence. Defaults to [HashMapStateStore].
+ * @param configure A lambda to configure the [States] instance.
+ * @return A configured [States] instance.
  */
 fun <State : Any, GlobalState : Any> KGram.states(
     stateStore: StateStore<State, GlobalState> = HashMapStateStore(),
@@ -22,13 +21,12 @@ fun <State : Any, GlobalState : Any> KGram.states(
 ) = States(stateStore, this).apply(configure)
 
 /**
- * Manages finite state machine (FSM) logic for a Telegram bot.
+ * A class for managing user states in a Telegram bot.
  *
- * This class enables tracking user states and a global user state, handling
- * updates through associated [StateHandler]s based on the current state.
- *
- * @param State The type representing the user-specific state.
- * @param GlobalState The type representing the global user state.
+ * @param State The type of the current state.
+ * @param GlobalState The type of the global state.
+ * @param stateStore The [StateStore] used for state persistence.
+ * @param kGram The [KGram] instance associated with this state manager.
  */
 class States<State : Any, GlobalState : Any> internal constructor(
     private val stateStore: StateStore<State, GlobalState>,
@@ -52,45 +50,45 @@ class States<State : Any, GlobalState : Any> internal constructor(
     }
 
     /**
-     * Retrieves the current [StatesHolder] for the given user.
+     * Retrieves the state for a user.
      *
-     * @param userId The unique identifier of the user.
-     * @return The current state holder or `null` if no state is stored.
+     * @param userId The ID of the user.
+     * @return The [StatesHolder] containing the user's current and global state, or null if not found.
      */
     suspend fun get(userId: Long) = stateStore.get(userId)
 
     /**
-     * Updates the current user state while keeping the global user state unchanged.
+     * Sets the current state for a user.
      *
-     * @param userId The unique identifier of the user.
+     * @param userId The ID of the user.
      * @param currentState The new current state.
      */
     suspend fun setCurrentState(userId: Long, currentState: State) {
         set(
             userId = userId,
             kGram = kGram(),
-            statesHolder = stateStore.get(userId)?.copy(current = currentState) ?: return
+            statesHolder = stateStore.get(userId)?.copy(current = currentState) ?: StatesHolder(current = currentState)
         )
     }
 
     /**
-     * Updates the global user state while keeping the current user state unchanged.
+     * Sets the global state for a user.
      *
-     * @param userId The unique identifier of the user.
-     * @param globalState The new global user state.
+     * @param userId The ID of the user.
+     * @param globalState The new global state.
      */
     suspend fun setGlobalState(userId: Long, globalState: GlobalState) {
         set(
             userId = userId,
             kGram = kGram(),
-            statesHolder = stateStore.get(userId)?.copy(global = globalState) ?: return
+            statesHolder = stateStore.get(userId)?.copy(global = globalState) ?: StatesHolder(global = globalState)
         )
     }
 
     /**
-     * Sets both the user state and the global user state.
+     * Sets both the current and global state for a user.
      *
-     * @param userId The unique identifier of the user.
+     * @param userId The ID of the user.
      * @param currentState The new current state.
      * @param globalState The new global state.
      */
@@ -98,22 +96,36 @@ class States<State : Any, GlobalState : Any> internal constructor(
         set(
             userId = userId,
             kGram = kGram(),
-            statesHolder = StatesHolder(currentState, globalState)
+            statesHolder = StatesHolder(current = currentState, global = globalState)
         )
     }
 
+    /**
+     * Sets the state for a user and triggers the state handler.
+     *
+     * @param userId The ID of the user.
+     * @param kGram The [KGram] instance.
+     * @param statesHolder The [StatesHolder] containing the new state.
+     */
     private suspend fun set(userId: Long, kGram: KGram, statesHolder: StatesHolder<State, GlobalState>) {
         stateStore.set(userId, statesHolder)
         withStateHandler(userId, kGram) { it.handleState() }
     }
 
+    /**
+     * Executes a state handler for a user if the state exists.
+     *
+     * @param userId The ID of the user.
+     * @param kGram The [KGram] instance.
+     * @param handle A suspend function to handle the state context.
+     */
     private suspend fun withStateHandler(
         userId: Long,
         kGram: KGram,
         handle: suspend StateHandler<State, State, GlobalState>.(StateContext<State, State, GlobalState>) -> Unit
     ) {
         val states = stateStore.get(userId) ?: return
-        val stateHandler = stateHandlers[states.current::class] ?: return
+        val stateHandler = states.current?.let { it::class }?.let(stateHandlers::get) ?: return
 
         val stateContext = StateContext(kGram, userId, states)
         stateHandler.handle(stateContext)
@@ -125,10 +137,10 @@ class States<State : Any, GlobalState : Any> internal constructor(
     }
 
     /**
-     * Registers a [StateHandler] for a specific current state class.
+     * Registers a state handler for a specific state class.
      *
      * @param kClass The class of the state to handle.
-     * @param handler The handler instance responsible for processing that state.
+     * @param handler The [StateHandler] for the state.
      */
     @Suppress("UNCHECKED_CAST")
     fun handleState(kClass: KClass<out State>, handler: StateHandler<State, out State, GlobalState>) {
@@ -136,9 +148,10 @@ class States<State : Any, GlobalState : Any> internal constructor(
     }
 
     /**
-     * Registers a [StateHandler] for a specific state using a reified generic.
+     * Registers a state handler for a specific state type.
      *
-     * @param handler The handler instance responsible for the specified child state.
+     * @param ChildState The type of the state to handle.
+     * @param handler The [StateHandler] for the state.
      */
     inline fun <reified ChildState : State> handleState(
         handler: StateHandler<State, in ChildState, GlobalState>
