@@ -22,6 +22,10 @@ dependencies {
 publishing {
     publications {
         create<MavenPublication>("maven") {
+            groupId = "com.github.danl.kgram"
+            artifactId = "core"
+            version = "0.1"
+
             from(components["java"])
         }
     }
