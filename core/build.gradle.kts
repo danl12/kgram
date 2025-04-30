@@ -3,7 +3,7 @@ plugins {
     `maven-publish`
 }
 
-group = "com.github.danl"
+group = "com.github.danl.kgram"
 version = "0.1.1"
 
 repositories {
