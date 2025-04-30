@@ -1,9 +1,9 @@
 plugins {
     kotlin("jvm")
-//    `maven-publish`
+    `maven-publish`
 }
 
-group = "com.danl.kgram"
+group = "com.github.danl12"
 version = "0.1.1"
 
 repositories {
@@ -19,14 +19,10 @@ dependencies {
     testImplementation(kotlin("test"))
 }
 
-//publishing {
-//    publications {
-//        create<MavenPublication>("maven") {
-//            groupId = "com.danl.kgram"
-//            artifactId = "kgram-core"
-//            version = "0.1.1"
-//
-//            from(components["java"])
-//        }
-//    }
-//}
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+        }
+    }
+}

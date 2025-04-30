@@ -3,11 +3,11 @@ package com.github.danl
 import kotlinx.coroutines.runBlocking
 import org.telegram.telegrambots.meta.api.objects.InputFile
 import org.telegram.telegrambots.meta.api.objects.message.Message
-import com.github.danl.kgram.kGram
-import com.github.danl.kgram.sendPhoto
-import com.github.danl.kgram.states.StateContext
-import com.github.danl.kgram.states.StateHandler
-import com.github.danl.kgram.states.states
+import com.danl.kgram.kGram
+import com.danl.kgram.sendPhoto
+import com.danl.kgram.states.StateContext
+import com.danl.kgram.states.StateHandler
+import com.danl.kgram.states.states
 
 sealed class UserState {
     data object WaitingForName : UserState()

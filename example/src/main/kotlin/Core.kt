@@ -4,10 +4,10 @@ import kotlinx.coroutines.runBlocking
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.objects.InputFile
 import org.telegram.telegrambots.meta.api.objects.message.Message
-import com.github.danl.kgram.send
-import com.github.danl.kgram.kGram
-import com.github.danl.kgram.sendPhoto
-import com.github.danl.kgram.util.inlineKeyboardMarkup
+import com.danl.kgram.send
+import com.danl.kgram.kGram
+import com.danl.kgram.sendPhoto
+import com.danl.kgram.util.inlineKeyboardMarkup
 
 fun main(): Unit = runBlocking {
     kGram(token = "YOUR_BOT_TOKEN") {
