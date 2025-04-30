@@ -1,6 +1,6 @@
-package com.github.danl.kgram.states
+package com.danl.kgram.states
 
-import com.github.danl.kgram.KGram
+import com.danl.kgram.KGram
 
 /**
  * A context class for managing state-related operations in a Telegram bot.

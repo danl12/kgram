@@ -1,4 +1,4 @@
-package com.github.danl.kgram
+package com.danl.kgram
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import kotlinx.coroutines.*
@@ -32,8 +32,8 @@ import org.telegram.telegrambots.meta.api.objects.polls.Poll
 import org.telegram.telegrambots.meta.api.objects.polls.PollAnswer
 import org.telegram.telegrambots.meta.api.objects.reactions.MessageReactionCountUpdated
 import org.telegram.telegrambots.meta.api.objects.reactions.MessageReactionUpdated
-import com.github.danl.kgram.handler.UpdateHandler
-import com.github.danl.kgram.handler.UpdatePropertyHandler
+import com.danl.kgram.handler.UpdateHandler
+import com.danl.kgram.handler.UpdatePropertyHandler
 import java.io.Serializable
 import kotlin.reflect.KFunction2
 

@@ -1,4 +1,4 @@
-package com.github.danl.kgram.states
+package com.danl.kgram.states
 
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery
 import org.telegram.telegrambots.meta.api.objects.message.Message

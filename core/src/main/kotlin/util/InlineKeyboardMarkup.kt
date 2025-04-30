@@ -1,4 +1,4 @@
-package com.github.danl.kgram.util
+package com.danl.kgram.util
 
 import org.telegram.telegrambots.meta.api.objects.LoginUrl
 import org.telegram.telegrambots.meta.api.objects.games.CallbackGame

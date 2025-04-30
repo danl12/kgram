@@ -1,4 +1,4 @@
-package com.github.danl.kgram
+package com.danl.kgram
 
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext

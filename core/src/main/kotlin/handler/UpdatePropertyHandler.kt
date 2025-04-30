@@ -1,8 +1,8 @@
-package com.github.danl.kgram.handler
+package com.danl.kgram.handler
 
 import org.telegram.telegrambots.meta.api.objects.Update
-import com.github.danl.kgram.KGram
-import com.github.danl.kgram.kGram
+import com.danl.kgram.KGram
+import com.danl.kgram.kGram
 
 internal class UpdatePropertyHandler<T : Any>(
     private val getProperty: (Update) -> T?,
